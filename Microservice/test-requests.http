@@ -1,0 +1,80 @@
+
+### Valid request
+POST http://localhost:4000/percent?total=50 HTTP/1.1
+content-type: application/json
+
+{
+    "param1": 4.4,
+    "param2": 3,
+    "param3": 1
+}
+
+### parameter is zero: valid
+POST http://localhost:4000/percent?total=50 HTTP/1.1
+content-type: application/json
+
+{
+    "param1": 4.4,
+    "param2": 0,
+    "param3": 1
+}
+
+### total query is not a number: invalid
+POST http://localhost:4000/percent?total=bad HTTP/1.1
+content-type: application/json
+
+{
+    "param1": 4.4,
+    "param2": 3,
+    "param3": 1
+}
+
+### body is not an object: invalid
+POST http://localhost:4000/percent?total=50 HTTP/1.1
+content-type: application/json
+
+[{
+    "param1": 4.4,
+    "param2": 3,
+    "param3": 1
+}]
+
+### parameter is not a number: invalid
+POST http://localhost:4000/percent?total=50 HTTP/1.1
+content-type: application/json
+
+{
+    "param1": 4.4,
+    "param2": "f",
+    "param3": 1
+}
+
+### total is 0: invalid
+POST http://localhost:4000/percent?total=0 HTTP/1.1
+content-type: application/json
+
+{
+    "param1": 4.4,
+    "param2": 3,
+    "param3": 1
+}
+
+### total is negative: invalid
+POST http://localhost:4000/percent?total=-5 HTTP/1.1
+content-type: application/json
+
+{
+    "param1": 4.4,
+    "param2": 3,
+    "param3": 1
+}
+
+### parameter is negative: invalid
+POST http://localhost:4000/percent?total=50 HTTP/1.1
+content-type: application/json
+
+{
+    "param1": 4.4,
+    "param2": -3,
+    "param3": 1
+}

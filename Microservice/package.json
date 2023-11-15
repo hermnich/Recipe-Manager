@@ -1,0 +1,18 @@
+{
+  "name": "percent_microservice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "percent_converter.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon percent_converter.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "nodemon": "^2.0.22"
+  }
+}
