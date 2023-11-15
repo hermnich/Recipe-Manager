@@ -1,9 +1,9 @@
 import React from 'react';
 
 
-function IngredientSelectRow({row}) {
+function IngredientSelectRow({ingredient}) {
     return (
-        <option value={row.ingredient_id} label={row.name}></option>
+        <option value={ingredient.ingredient_id} label={ingredient.name}></option>
     );
   }
   

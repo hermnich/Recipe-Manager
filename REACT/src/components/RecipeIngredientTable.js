@@ -1,9 +1,24 @@
-import React from 'react';
+import {React, useState, useEffect} from 'react';
 import RecipeIngredientRow from './RecipeIngredientRow';
 import {MdAdd} from 'react-icons/md';
 
 
-function RecipeIngredientTable({recipeIngredients, onEdit, onDelete, onCreate, recipe_id}) {
+function RecipeIngredientTable({recipeIngredients, onDelete, onUpdate, onCreate}) {
+    
+    const [ingredients, setIngredients] = useState([])
+    const loadIngredients = async () => {
+        const response = await fetch('/ingredients');
+        if (response.status === 200) {
+            const ingredients = await response.json();
+            setIngredients(ingredients);
+        } else {
+            setIngredients([])
+        }
+    }
+    useEffect(() => {
+        loadIngredients();
+    }, []);
+
     return (
         <table>
             <thead>
@@ -12,12 +27,12 @@ function RecipeIngredientTable({recipeIngredients, onEdit, onDelete, onCreate, r
                 </tr>
             </thead>
             <tbody>
-                {recipeIngredients.map((row, i) => <RecipeIngredientRow row={row} onEdit={onEdit} onDelete={onDelete} key={i} />)}
-                <tr className='table-add'>
-                    <div className='tooltip'>
-                        {<MdAdd onClick={() => onCreate(recipe_id)}/>}
+                {recipeIngredients.map((row, i) => <RecipeIngredientRow row={row} ingredients={ingredients} onDelete={onDelete} onUpdate={onUpdate} key={i} />)}
+                <tr className='table-add' >
+                    <td className='tooltip' colSpan='5'>
+                        {<MdAdd onClick={() => {onCreate()}}/>}
                         <span className='tooltiptext'>Add Ingredient</span>
-                    </div>
+                    </td>
                 </tr>
             </tbody>
         </table>

@@ -1,25 +1,65 @@
+import React from 'react';
 import {useNavigate} from 'react-router-dom';
 import Navigation from '../components/Navigation'
 import {MdAdd, MdEdit, MdDelete} from 'react-icons/md';
 
-function HomePage({setRecipeToEdit, setIngredientToEdit}){
+function HomePage({onCreateRecipe, onCreateIngredient}){
     const navigate = useNavigate()
 
-    const browseRecipes = async () => {
-        navigate(`/recipes`)
+    const insertRecipe = async () => {
+        const recipe = {
+            name: "Title",
+            servings: 0,
+            cals_per_serving: 0,
+            instructions: ''
+        }
+        const response = await fetch(`/recipes`, {
+            method: 'POST',
+            body: JSON.stringify(recipe),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+  
+        if(response.status === 201){
+            // console.log(`Successfully created the recipe!\n${JSON.stringify(recipe)}`);
+            const result = await response.json();
+            return result.recipe_id;
+        } else {
+            console.error(`Failed to create recipe, status code = ${response.status}`);
+        }        
     }
-
-    const browseIngredients = async () => {
-        navigate(`/ingredients`)
-    }
-
     const createRecipe = async () => {
-        setRecipeToEdit({})
-        navigate(`/recipes/edit`)
+        const recipe_id = await insertRecipe();
+        navigate(`/recipes/${recipe_id}/edit`)
+    }
+  
+    const insertIngredient = async () => {
+        const ingredient = {
+            name: "Title",
+            serving_size: 0,
+            calories: 0,
+            cals_per_100g: 0
+        }
+        const response = await fetch(`/ingredients`, {
+            method: 'POST',
+            body: JSON.stringify(ingredient),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+  
+        if(response.status === 201){
+            // console.log(`Successfully created the recipe!\n${JSON.stringify(ingredient)}`);
+            const result = await response.json();
+            return result.ingredient_id;
+        } else {
+            console.error(`Failed to create recipe, status code = ${response.status}`);
+        }  
     }
     const createIngredient = async () => {
-        setIngredientToEdit({})
-        navigate(`/ingredients/edit`)
+        const ingredient_id = await insertIngredient();
+        navigate(`/ingredients/${ingredient_id}/edit`)
     }
 
     return (
@@ -41,13 +81,13 @@ function HomePage({setRecipeToEdit, setIngredientToEdit}){
             </div>
             <div className='home-page-button'>
                 <button
-                    onClick={browseRecipes} >
+                    onClick={e => {navigate(`/recipes`)}} >
                     Browse Recipes
                 </button>
             </div>
             <div className='home-page-button'>
                 <button
-                    onClick={browseIngredients} >
+                    onClick={e => {navigate(`/ingredients`)}} >
                     Browse Ingredients
                 </button>
             </div>

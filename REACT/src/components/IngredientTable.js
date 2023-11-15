@@ -14,10 +14,10 @@ function IngredientTable({ingredients, onEdit, onDelete, onCreate}) {
             <tbody>
                 {ingredients.map((row, i) => <IngredientRow row={row} onEdit={onEdit} onDelete={onDelete} key={i} />)}
                 <tr className='table-add'>
-                    <div className='tooltip'>
+                    <td className='tooltip' colSpan='6'>
                         {<MdAdd onClick={() => onCreate()}/>}
                         <span className='tooltiptext'>New Ingredient</span>
-                    </div>
+                    </td>
                 </tr>
             </tbody>
         </table>

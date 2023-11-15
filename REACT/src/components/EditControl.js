@@ -12,8 +12,6 @@ function EditControl ({onSave, onDelete}) {
                 {<MdSave className='save-button' onClick={onSave}/>}
                 <span className='tooltiptext'>Save</span>
             </span>
-            
-            
         </span>
     )
 }

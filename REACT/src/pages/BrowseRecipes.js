@@ -1,15 +1,14 @@
-import React, {useState, useEffect} from 'react';
-import RecipeTable from '../components/RecipeTable';
+import {React, useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Navigation from '../components/Navigation'
+import RecipeTable from '../components/RecipeTable';
 import {MdAdd} from 'react-icons/md';
 
 
-function BrowseRecipes({setRecipeToEdit}){
-
+function BrowseRecipes(){
     const navigate = useNavigate()
+
     const [recipes, setRecipes] = useState([]);
-	
     const loadRecipes = async () => {
         const response = await fetch('/recipes');
         if (response.status === 200) {
@@ -20,7 +19,6 @@ function BrowseRecipes({setRecipeToEdit}){
         }
         
     };
-        
     useEffect(() => {
         loadRecipes();
     }, []);
@@ -36,15 +34,37 @@ function BrowseRecipes({setRecipeToEdit}){
         }
     };
 
-    const editRecipe = async recipeToEdit => {
-        setRecipeToEdit(recipeToEdit);
-        navigate("/recipes/edit");
+    const editRecipe = async recipe_id => {
+        navigate(`/recipes/${recipe_id}/edit`);
     };
 
+    const insertRecipe = async () => {
+        const recipe = {
+            name: "Title",
+            servings: 0,
+            cals_per_serving: 0,
+            instructions: ''
+        }
+        const response = await fetch(`/recipes`, {
+            method: 'POST',
+            body: JSON.stringify(recipe),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+  
+        if(response.status === 201){
+            // console.log(`Successfully created the recipe!\n${JSON.stringify(recipe)}`);
+            const result = await response.json();
+            return result.recipe_id;
+        } else {
+            console.error(`Failed to create recipe, status code = ${response.status}`);
+        }        
+    }
     const createRecipe = async () => {
-        setRecipeToEdit({});
-        navigate("/recipes/edit");
-    };
+        const recipe_id = await insertRecipe();
+        navigate(`/recipes/${recipe_id}/edit`)
+    }
 
     return (
         <div>

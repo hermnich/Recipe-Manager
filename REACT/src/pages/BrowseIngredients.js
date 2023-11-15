@@ -1,15 +1,14 @@
-import React, {useState, useEffect} from 'react';
-import IngredientTable from '../components/IngredientTable';
+import {React, useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Navigation from '../components/Navigation'
+import IngredientTable from '../components/IngredientTable';
 import {MdAdd} from 'react-icons/md';
 
 
-function BrowseIngredients({setIngredientToEdit}){
-
+function BrowseIngredients(){
     const navigate = useNavigate()
+
     const [ingredients, setIngredients] = useState([]);
-	
     const loadIngredients = async () => {
         const response = await fetch('/ingredients');
         if (response.status === 200) {
@@ -20,12 +19,11 @@ function BrowseIngredients({setIngredientToEdit}){
         }
         
     }
-
     useEffect(() => {
         loadIngredients();
     }, []);
 
-    const onDelete = async ingredient => {
+    const deleteIngredient = async ingredient => {
         if (window.confirm(`Are you sure you want to delete the ingredient ${ingredient.name}?`)) {
             const response = await fetch(`/ingredients/${ingredient.ingredient_id}`, { method: 'DELETE' });
             if (response.status === 204) {
@@ -36,14 +34,36 @@ function BrowseIngredients({setIngredientToEdit}){
         };
     }	
 
-    const onEdit = async ingredientToEdit => {
-        setIngredientToEdit(ingredientToEdit);
-        navigate("/ingredients/edit");
+    const editIngredient = async ingredient_id => {
+        navigate(`/ingredients/${ingredient_id}/edit`);
     }
 
-    const onCreate = async () => {
-        setIngredientToEdit({});
-        navigate("/ingredients/edit");
+    const insertIngredient = async () => {
+        const ingredient = {
+            name: "Title",
+            serving_size: 0,
+            calories: 0,
+            cals_per_100g: 0
+        }
+        const response = await fetch(`/ingredients`, {
+            method: 'POST',
+            body: JSON.stringify(ingredient),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+  
+        if(response.status === 201){
+            // console.log(`Successfully created the recipe!\n${JSON.stringify(ingredient)}`);
+            const result = await response.json();
+            return result.ingredient_id;
+        } else {
+            console.error(`Failed to create recipe, status code = ${response.status}`);
+        }  
+    }
+    const createIngredient = async () => {
+        const ingredient_id = await insertIngredient();
+        navigate(`/ingredients/${ingredient_id}/edit`)
     }
 
     return (
@@ -53,13 +73,13 @@ function BrowseIngredients({setIngredientToEdit}){
                 <span className='title-text'>Ingredients</span>
                 <span className='app-edit'>
                     <span className='tooltip'>
-                        {<MdAdd className='add-button' onClick={onCreate}/>}
+                        {<MdAdd className='add-button' onClick={createIngredient}/>}
                         <span className='tooltiptext'>New Ingredient</span>
                     </span>
                 </span>
             </div>
             <div className='Ingredient-table'>
-                <IngredientTable ingredients={ingredients} onEdit={onEdit} onDelete={onDelete} onCreate={onCreate}/>
+                <IngredientTable ingredients={ingredients} onEdit={editIngredient} onDelete={deleteIngredient} onCreate={createIngredient}/>
             </div>
         </div>
     )

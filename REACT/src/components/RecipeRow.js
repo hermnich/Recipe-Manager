@@ -10,7 +10,7 @@ function RecipeRow({row, onEdit, onDelete}) {
             <td>{row.cals_per_serving}</td>
             <td className='row-edit'>
                 <div className='tooltip'>
-                    {<MdEdit onClick={() => onEdit(row)}/>}
+                    {<MdEdit onClick={() => onEdit(row.recipe_id)}/>}
                     <span className='tooltiptext'>Edit</span>
                 </div>
             </td>

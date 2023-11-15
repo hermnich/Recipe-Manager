@@ -1,33 +1,45 @@
-import React, {useState} from 'react';
-import { useNavigate } from 'react-router-dom';
+import {React, useState, useEffect} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
 import Navigation from '../components/Navigation'
 import EditControl from '../components/EditControl'
 
 
-function IngredientEdit({ingredientToEdit}) {
+function IngredientEdit() {
     const navigate = useNavigate()
 
-    const [name, setName] = useState(ingredientToEdit.name);
-    const [servingSize, setServingSize] = useState(ingredientToEdit.serving_size);
-    const [calories, setCalories] = useState(ingredientToEdit.calories);
-    const [calsPer100g, setCalsPer100g] = useState(ingredientToEdit.cals_per_100g);
+    const {ingredient_id} = useParams();
 
-    const saveIngredient = async () => {
+    const [name, setName] = useState("");
+    const [servingSize, setServingSize] = useState(0);
+    const [calories, setCalories] = useState(0);
+    const [calsPer100g, setCalsPer100g] = useState(0);
+
+    const loadIngredient = async () => {
+        const response = await fetch(`/ingredients/${ingredient_id}`);
+        if (response.status === 200) {
+            let ingredient = await response.json();
+            ingredient = ingredient[0];
+            setName(ingredient.name);
+            setServingSize(ingredient.serving_size);
+            setCalories(ingredient.calories);
+            setCalsPer100g(ingredient.cals_per_100g);
+        } else {
+            console.error("Failed to get ingredient")
+        }
+    };
+    useEffect(() => {
+        loadIngredient();
+    }, []);
+
+    const updateIngredient = async () => {
         const ingredient = {
             name: name,
             serving_size: servingSize,
             calories: calories,
             cals_per_100g: calsPer100g
         }
-        if ("ingredient_id" in ingredientToEdit) {
-            updateIngredient(ingredient)
-        } else {
-            insertIngredient(ingredient)
-        }
-    };
-    
-    const updateIngredient = async (ingredient) => {
-        const response = await fetch(`/ingredients/${ingredientToEdit.ingredient_id}`, {
+
+        const response = await fetch(`/ingredients/${ingredient_id}`, {
             method: 'PUT',
             body: JSON.stringify(ingredient),
             headers: {
@@ -35,38 +47,23 @@ function IngredientEdit({ingredientToEdit}) {
             },
         });
         if(response.status === 200){
-             alert("Successfully edited the ingredient!");
+             // alert("Successfully edited the ingredient!");
         } else {
-             alert(`Failed to edit recipe, status code = ${response.status}`);
+             console.error(`Failed to edit recipe, status code = ${response.status}`);
         }     
     };
 
-    const insertIngredient = async (ingredient) => {
-        const response = await fetch(`/ingredients`, {
-            method: 'POST',
-            body: JSON.stringify(ingredient),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if(response.status === 201){
-            alert("Successfully created the ingredient!");
-       } else {
-            alert(`Failed to create ingredient, status code = ${response.status}`);
-       }     
-    }
-
-    const deleteIngredient = async ingredient => {
+    const deleteIngredient = async () => {
         if (window.confirm(`Are you sure you want to delete this ingredient?`)) {
-            const response = await fetch(`/ingredients/${ingredient.ingredient_id}`, { method: 'DELETE' });
+            const response = await fetch(`/ingredients/${ingredient_id}`, { method: 'DELETE' });
             if (response.status === 204) {
                 navigate(-1)
             } else {
-            console.error(`Failed to delete ingredient with id = ${ingredient.ingredient_id}, status code = ${response.status}`)
+            console.error(`Failed to delete ingredient with id = ${ingredient_id}, status code = ${response.status}`)
             }
         };
     }	
-    
+
     return (
         <div>
             <div className='nav-bar'>
@@ -78,7 +75,7 @@ function IngredientEdit({ingredientToEdit}) {
                         value={name}
                         onChange={e => setName(e.target.value)} />
                 </span>
-                <EditControl onSave={saveIngredient} onDelete={deleteIngredient}/>
+                <EditControl onSave={updateIngredient} onDelete={deleteIngredient}/>
             </div>
             
             <div className='data-input'>
