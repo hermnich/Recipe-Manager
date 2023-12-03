@@ -1,74 +1,41 @@
 import {React, useState} from 'react';
 import {MdDelete} from 'react-icons/md';
-import IngredientSelectRow from '../components/ingredientSelectRow';
+import IngredientSelectOption from '../components/ingredientSelectOption';
+import * as RecipeIngredients from '../modules/RecipeIngredients'
 
 
-function RecipeIngredientRow({row, ingredients, onDelete, onUpdate}) {
+export default function RecipeIngredientRow({row, ingredients, onUpdate, onDelete}) {
 
-    const [calories, setCalories] = useState(parseInt(row.cals_per_100g * row.grams / 100));
-
-    const updateRecipeIngredient = async () => {
-        const ingredient = {
-            recipe_id: row.recipe_id,
-            ingredient_id: row.ingredient_id,
-            quantity: row.quantity,
-            grams: row.grams
-        }
-
-        const response = await fetch(`/recipe_ingredients/${row.recipe_ingredient_id}`, {
-            method: 'PUT',
-            body: JSON.stringify(ingredient),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if (response.status === 200) {
-            // console.log(`Successfully edited the ingredient!\n${JSON.stringify(ingredient)}`);
-            onUpdate();
-        } else {
-            console.error(`Failed to edit ingredient, status code = ${response.status}`);
-        }
-    };
+    const [calories, setCalories] = useState(parseInt(row.calories * row.quantity / 100));
 
     return (
         <tr>
             <td>
-                <select
-                    value={row.ingredient_id}
-                    label={row.name}
+                <select value={row.ingredient_id} label={row.name}
                     onChange={e => {
                         row.ingredient_id = e.target.value;
-                        updateRecipeIngredient()}}>
-                    {ingredients.map((ingredient, i) => <IngredientSelectRow ingredient={ingredient} key={i} />)}
+                        RecipeIngredients.updateID(row)}}>
+                    {ingredients.map((ingredient, i) => <IngredientSelectOption ingredient={ingredient} key={i} />)}
                 </select>
             </td>
             <td>
-                <input 
-                    type="text"
-                    value={row.quantity}
+                <input type="text" value={row.quantity_text}
                     onChange={e => {
                         row.quantity = e.target.value;
-                        updateRecipeIngredient()}}/>
+                        RecipeIngredients.updateID(row)}}/>
             </td>
             <td>
-                <input 
-                    type="number"
-                    value={row.grams}
+                <input type="number" value={row.quantity}
                     onChange={e => {
                         row.grams = e.target.value;
-                        setCalories(parseInt(row.cals_per_100g * row.grams / 100))
-                        updateRecipeIngredient()}}/>
+                        setCalories(parseInt(row.calories * row.quantity / 100))
+                        RecipeIngredients.updateID(row)}}/>
             </td>
             <td>{calories}</td>
-            <td className='row-delete'>
-                <span className='tooltip'>
-                    {<MdDelete onClick={() => onDelete(row)}/>}
-                    <span className='tooltiptext'>Delete</span>
-                </span>
+            <td>
+                <MdDelete className='btn btn-table tooltip' onClick={() => onDelete(row, onUpdate)}/>
+                <span className='tooltip-text'>Delete</span>
             </td>
         </tr>
     );
-  }
-  
-
-export default RecipeIngredientRow;
+}

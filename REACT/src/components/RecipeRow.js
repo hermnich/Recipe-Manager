@@ -1,28 +1,27 @@
 import React from 'react';
+import {useNavigate} from 'react-router-dom';
 import {MdDelete, MdEdit} from 'react-icons/md';
 
 
-function RecipeRow({row, onEdit, onDelete}) {
+export default function RecipeRow({row, onEdit, onDelete}) {
+    const navigate = useNavigate();
+
     return (
         <tr>
-            <td>{row.name}</td>
-            <td>{row.servings}</td>
-            <td>{row.cals_per_serving}</td>
-            <td className='row-edit'>
-                <div className='tooltip'>
-                    {<MdEdit onClick={() => onEdit(row.recipe_id)}/>}
-                    <span className='tooltiptext'>Edit</span>
-                </div>
+            <td>
+                <span className='btn btn-table tooltip' onClick={e => {navigate(`/recipes/${row.recipe_id}`)}}>{row.name}</span>
+                <span className='tooltip-text'>View Recipe</span>
             </td>
-            <td className='row-delete'>
-                <div className='tooltip'>
-                    {<MdDelete onClick={() => onDelete(row)}/>}
-                    <span className='tooltiptext'>Delete</span>
-                </div>
+            <td>{row.servings}</td>
+            <td>{row.calories}</td>
+            <td>
+                <MdEdit className='btn btn-table tooltip' onClick={() => onEdit(row.recipe_id)}/>
+                <span className='tooltip-text'>Edit</span>
+            </td>
+            <td>
+                <MdDelete className='btn btn-table tooltip' onClick={() => onDelete(row)}/>
+                <span className='tooltip-text'>Delete</span>
             </td>
         </tr>
     );
-  }
-  
-
-export default RecipeRow;
+}

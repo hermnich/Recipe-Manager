@@ -1,19 +1,14 @@
-import {MdSave, MdDelete} from 'react-icons/md';
+import {MdSave, MdDelete, MdClose} from 'react-icons/md';
 
-function EditControl ({onSave, onDelete}) {
-
+export default function EditControl ({onSave, onDelete, onClose}) {
     return (
-        <span className='app-edit'>
-            <span className='tooltip'>
-                {<MdDelete className='delete-button' onClick={onDelete}/>}
-                <span className='tooltiptext'>Delete</span>
-            </span>
-            <span className='tooltip'>
-                {<MdSave className='save-button' onClick={onSave}/>}
-                <span className='tooltiptext'>Save</span>
-            </span>
+        <span className='nav-edit'>
+            <MdDelete className='btn btn-nav tooltip' onClick={onDelete}/>
+            <span className='tooltip-text'>Delete</span>
+            <MdSave className='btn btn-nav tooltip' onClick={onSave}/>
+            <span className='tooltip-text'>Save</span>
+            <MdClose className='btn btn-nav tooltip' onClick={onClose}/>
+            <span className='tooltip-text'>Close Editor</span>
         </span>
     )
 }
-
-export default EditControl

@@ -3,6 +3,9 @@ import {useNavigate, useParams} from 'react-router-dom';
 import Navigation from '../components/Navigation'
 import EditControl from '../components/EditControl'
 import RecipeIngredientTable from '../components/RecipeIngredientTable'
+import * as Recipes from '../modules/Recipes'
+import * as RecipeIngredients from '../modules/RecipeIngredients'
+import * as Nutrition from '../modules/Nutrition'
 
 
 function RecipeEdit() {
@@ -10,147 +13,125 @@ function RecipeEdit() {
 
     const {recipe_id} = useParams();
 
+    const [recipe, setRecipe] = useState({})
     const [recipeIngredients, setRecipeIngredients] = useState([]);
-    const [name, setName] = useState('');
-    const [servings, setServings] = useState(0);
-    const [calsPerServing, setCalsPerServing] = useState(0);
-    const [instructions, setInstructions] = useState('');
+    const [nutrition, setNutrition] = useState(Nutrition.emptyNutrition)
 
-    const loadRecipe = async () => {
-        const response = await fetch(`/recipes/${recipe_id}`);
-        if (response.status === 200) {
-            let recipe = await response.json();
-            recipe = recipe[0];
-            setName(recipe.name);
-            setServings(recipe.servings);
-            setCalsPerServing(recipe.cals_per_serving);
-            setInstructions(recipe.instructions);
-        } else {
-            console.error("Failed to get recipe")
-        }
-        
-    };
     useEffect(() => {
-        loadRecipe();
+        Recipes.loadID(recipe_id, setRecipe);
+        RecipeIngredients.load(recipe_id, setRecipeIngredients)
     }, []);
-
-    const loadRecipeIngredients = async () => {
-        const response = await fetch(`/recipes/${recipe_id}/ingredients`);
-        if (response.status === 200) {
-            const recipeIngredients = await response.json();
-            setRecipeIngredients(recipeIngredients);
-        } else {
-            setRecipeIngredients([])
-        }
-    };
-    useEffect(() => {
-        loadRecipeIngredients();
-    }, []);
-
-    const updateRecipe = async () => {
-        const recipe = {
-            name: name,
-            servings: servings,
-            cals_per_serving: calsPerServing,
-            instructions: instructions
-        }
-        const response = await fetch(`/recipes/${recipe_id}`, {
-            method: 'PUT',
-            body: JSON.stringify(recipe),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if(response.status === 200){
-             // console.log(`Successfully edited the recipe!\n${JSON.stringify(recipe)}`);
-        } else {
-             console.error(`Failed to edit recipe, status code = ${response.status}`);
-        }
-    };
-
-    const deleteRecipe = async () => {
-        if (window.confirm(`Are you sure you want to delete this recipe?`)) {
-            const response = await fetch(`/recipes/${recipe_id}`, { method: 'DELETE' });
-            if (response.status === 204) {
-                navigate(-1)
-            } else {
-            console.error(`Failed to delete recipe with id = ${recipe_id}, status code = ${response.status}`)
-            }
-        }
-    }
-
-    const deleteRecipeIngredient = async (ingredient) => {
-        if (window.confirm(`Are you sure you want to remove ${ingredient.name} from this recipe?`)) {
-            const response = await fetch(`/recipe_ingredients/${ingredient.recipe_ingredient_id}`, { method: 'DELETE' });
-            if (response.status === 204) {
-                loadRecipeIngredients(ingredient.recipe_id);
-            } else {
-                console.error(`Failed to remove ${ingredient.name}, status code = ${response.status}`)
-            }
-        }
-    };
-
-    const insertRecipeIngredient = async () => {
-        const recipeIngredient = {
-            recipe_id: recipe_id,
-            ingredient_id: null,
-            quantity: '',
-            grams: 0
-        }
-        const response = await fetch(`/recipes/${recipe_id}/ingredients`, {
-            method: 'POST',
-            body: JSON.stringify(recipeIngredient),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-  
-        if(response.status === 201){
-            // console.log(`Successfully created the ingredient!\n${JSON.stringify(recipeIngredient)}`);
-            loadRecipeIngredients();
-        } else {
-            console.error(`Failed to create the ingredient, status code = ${response.status}`);
-        }        
-    }
 
     return (
-        <div>
-            <div className='nav-bar'>
+        <div className='page page-recipe-edit'>
+            <div className='nav'>
                 <Navigation/>
-                <span className='title-input'>
-                    <input
-                        type="text"
-                        placeholder="Title"
-                        value={name}
-                        onChange={e => {setName(e.target.value)}}/>
+                <span className='title'>
+                    <input type="text" value={recipe.name} placeholder="Title" onChange={e => setRecipe({...recipe, name: e.target.value})}/>
                 </span >
-                <EditControl onSave={updateRecipe} onDelete={deleteRecipe}/>
+                <EditControl 
+                    onSave={() => Recipes.updateID(recipe)} 
+                    onDelete={() => Recipes.deleteID(recipe, () => navigate(`/recipes`))} 
+                    onClose={() => {navigate(`/recipes/${recipe_id}`)}}/>
             </div>
-            <div className='recipe-ingredient-table'>
-                <RecipeIngredientTable recipeIngredients={recipeIngredients} onDelete={deleteRecipeIngredient} onUpdate={loadRecipeIngredients} onCreate={insertRecipeIngredient}/>
+            <RecipeIngredientTable 
+                recipeIngredients={recipeIngredients} 
+                onCreate={(onUpdate) => RecipeIngredients.create(recipe_id, {}, onUpdate)}
+                onUpdate={() => RecipeIngredients.load(recipe_id, setRecipeIngredients)}
+                onDelete={(row, onUpdate) => RecipeIngredients.deleteID(row, onUpdate)}/>
+            <div className='data-input'>
+                <label className='label'>Servings: </label>
+                <input id='servings' type="number" value={recipe.servings} onChange={e => setRecipe({...recipe, servings: e.target.value})}/>
             </div>
             <div className='data-input'>
-                <label>Servings: </label>
-                <input
-                    type="number"
-                    value={servings}
-                    onChange={e => {setServings(e.target.value) }}/>
+                <div className='label'>Instructions: </div>
+                <textarea id='instructions' cols="70" rows="10" value={recipe.instructions} onChange={e => setRecipe({...recipe, instructions: e.target.value})}/>
             </div>
-            <div className='data-input'>
-                <label>Calories per Serving: </label>
-                <input
-                    type="number"
-                    value={calsPerServing}
-                    onChange={e => {setCalsPerServing(e.target.value)}}/>
-            </div>
-            <p className='instruction-label'>Instructions: </p>
-            <div className='instruction-input'>
-                <textarea
-                    cols="70"
-                    rows="10"
-                    value={instructions}
-                    onChange={e => {setInstructions(e.target.value)}}/>
-            </div>
+            <fieldset className='nutrition'>
+                <h2>Nutrition Facts</h2>
+                <hr className='divider thin'/>
+                <div className='serving-size'>
+                    <span className='label'>Serving Size</span>
+                    <span className='right value'>{nutrition.serving_size_text} ({nutrition.serving_size})g</span>
+                </div>
+                <hr className='divider thick'/>
+                <div className='calories'>
+                    <div>Amount per serving</div>
+                    <span className='label'>Calories</span>
+                    <span className='right value'>{nutrition.calories}</span>
+                </div>
+                <hr className='divider medium'/>
+                <div className='main-category'>
+                    <span className='label'>Total Fat </span> 
+                    <span className='value'>{nutrition.total_fat}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='sub-category'>
+                    <span className='label'>Saturated Fat </span>
+                    <span className='value'>{nutrition.saturated_fat}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='sub-category'>
+                    <span className='label'>Trans Fat </span>
+                    <span className='value'>{nutrition.trans_fat}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='main-category'>
+                    <span className='label'>Cholesterol </span>
+                    <span className='value'>{nutrition.cholesterol}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='main-category'>
+                    <span className='label'>Sodium </span>
+                    <span className='value'>{nutrition.sodium}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='main-category'>
+                    <span className='label'>Total Carbohydrate </span>
+                    <span className='value'>{nutrition.total_carbohydrate}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='sub-category'>
+                    <span className='label'>Dietary Fiber </span>
+                    <span className='value'>{nutrition.dietary_fiber}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='sub-category'>
+                    <span className='label'>Total Sugars </span>
+                    <span className='value'>{nutrition.total_sugars}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='sub-category' id='added-sugars'>
+                    <span className='label'>Added Sugars </span>
+                    <span className='value'>{nutrition.added_sugars}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='main-category'>
+                    <span className='label'>Protein </span>
+                    <span className='value'>{nutrition.protein}g</span>
+                </div>
+                <hr className='divider thick'/>
+                <div className='vitamin'>
+                    <span className='label'>Vitamin D </span>
+                    <span className='value'>{nutrition.vitamin_d}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='vitamin'>
+                    <span className='label'>Calcium </span>
+                    <span className='value'>{nutrition.calcium}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='vitamin'>
+                    <span className='label'>Iron </span>
+                    <span className='value'>{nutrition.iron}g</span>
+                </div>
+                <hr className='divider thin'/>
+                <div className='vitamin'>
+                    <span className='label'>Potassium </span>
+                    <span className='value'>{nutrition.potassium}g</span>
+                </div>
+                <hr className='divider medium'/>
+            </fieldset>
         </div>
     )
 }

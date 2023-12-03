@@ -8,45 +8,123 @@ const app = express();
 
 app.use(express.json());
 
+
+function insert(table_name, req, res) {
+    let keys = []
+    let values = []
+    for (const [key, value] of Object.entries(req.body)) {
+        keys.push(key)
+        values.push(value)
+    }
+
+    const sql = "INSERT INTO ?? (??) VALUES (?);";
+    db.pool.query(sql, [table_name, keys, values], function(err, results) {
+        if (err) {
+            console.error(err)
+            res.status(400).json({ Error: 'Request failed' });
+        } else {
+            res.status(201).json({id: results.insertId});
+        };
+    });
+}
+
+function select_all(table_name, req, res) {
+    const sql = "SELECT * FROM ??"
+    db.pool.query(sql, table_name, function(err, results) {
+        if (err) {
+            console.error(err)
+            res.status(400).json({ Error: 'Request failed' });
+        } else if (results.length === 0){ 
+            res.status(404).json({ Error: 'Resource not found' })
+        } else {
+            res.status(200).json(results);
+        };
+    });
+}
+
+function select_id(table_name, req, res) {
+    let keys = []
+    let values = []
+    for (const [key, value] of Object.entries(req.params)) {
+        keys.push(key)
+        values.push(value)
+    }
+
+    const sql = `SELECT * FROM ?? WHERE ?? = ?`
+    db.pool.query(sql, [table_name, keys, values], function(err, results) {
+        if (err) {
+            console.error(err)
+            res.status(400).json({ Error: 'Request failed' });
+        } else if (results.length === 0){ 
+            res.status(404).json({ Error: 'Resource not found' })
+        } else {
+            res.status(200).json(results);
+        };
+    });
+}
+
+function update_id(table_name, req, res) {
+    const parameters = req.body;
+    let keys = []
+    let values = []
+    for (const [key, value] of Object.entries(req.params)) {
+        keys.push(key)
+        values.push(value)
+    }
+
+    const sql = "UPDATE ?? SET ? WHERE ?? = ?";
+    db.pool.query(sql, [table_name, parameters, keys, values], function(err, results) {
+        if (err) {
+            console.error(err)
+            res.status(400).json({ Error: 'Request failed' });
+        } else if (results.affectedRows === 1) {
+            res.status(200).json(results);
+        } else {
+        res.status(404).json({ Error: 'Resource not found' });
+        };
+    });
+}
+
+function delete_id(table_name, req, res) {
+    let keys = []
+    let values = []
+    for (const [key, value] of Object.entries(req.params)) {
+        keys.push(key)
+        values.push(value)
+    }
+
+    const sql = "DELETE FROM ?? WHERE ?? = ?"
+    db.pool.query(sql, [table_name, keys, values], function(err, results) {
+        if (err) {
+            console.error(err)
+            res.status(400).json({ Error: 'Request failed' });
+        } else if (results.affectedRows === 1) {
+            res.status(204).json(results);
+        } else {
+           res.status(404).json({ Error: 'Resource not found' });
+        };
+    });
+}
+
 /**
  * Recipe controls
  */
 
 // Create a new recipe with the provided parameters
 app.post('/recipes', (req, res) => {
-    const parameters = [
-        req.body.name,
-        req.body.servings,
-        req.body.cals_per_serving,
-        req.body.instructions];
-    const sql = "INSERT INTO Recipes (name, servings, cals_per_serving, instructions) VALUES (?, ?, ?, ?); ";
-    db.pool.getConnection(function(err, connection) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        }
-        connection.query(sql, parameters, function(err) {
-            if (err) {
-                console.error(err)
-                res.status(400).json({ Error: 'Request failed' });
-            } else {
-                connection.query("SELECT LAST_INSERT_ID() as recipe_id", function(err, results) {
-                    if (err) {
-                        console.error(err)
-                        res.status(400).json({ Error: 'Request failed' });
-                    } else {
-                        res.status(201).json({recipe_id: results[0].recipe_id});
-                    }
-                })
-            };
-        });
-        connection.release();
-    });
+    insert('Recipes', req, res)
 });
 
-// Retrieve all recipes
+// Retrieve all recipes. Includes calculated calories based on the ingredients for each recipe
 app.get('/recipes', (req, res) => {
-    const sql = "SELECT * FROM Recipes ORDER BY name ASC"
+    const sql = `SELECT Recipes.*, floor(sum(RecipeIngredients.quantity * Ingredients.calories / 100 / Recipes.servings)) AS calories
+                FROM Recipes
+                JOIN RecipeIngredients
+                    ON RecipeIngredients.recipe_id = Recipes.recipe_id
+                JOIN Ingredients
+                    ON Ingredients.ingredient_id = RecipeIngredients.ingredient_id
+                GROUP BY Recipes.recipe_id
+                ORDER BY Recipes.name ASC`
     db.pool.query(sql, function(err, results) {
         if (err) {
             console.error(err)
@@ -61,49 +139,17 @@ app.get('/recipes', (req, res) => {
 
 // Retrieve recipe with specified id
 app.get('/recipes/:recipe_id', (req, res) => {
-    const sql = "SELECT * FROM Recipes WHERE recipe_id = ?"
-    db.pool.query(sql, req.params.recipe_id, function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.length === 0){ 
-            res.status(404).json({ Error: 'Resource not found' })
-        } else {
-            res.status(200).json(results);
-        };
-    });
+    select_id('Recipes', req, res)
 });
 
 // Update a recipe with the provided parameters
 app.put('/recipes/:recipe_id', (req, res) => {
-    const parameters = req.body;
-    const sql = "UPDATE Recipes SET ? WHERE recipe_id = ?";
-    db.pool.query(sql, [parameters, req.params.recipe_id], function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.affectedRows === 1) {
-            res.status(200).json(results);
-        } else {
-        res.status(404).json({ Error: 'Resource not found' });
-        };
-    });
+    update_id("Recipes", req, res)
 });
 
 // Delete the recipe with specified id
 app.delete('/recipes/:recipe_id', (req, res) => {
-    const sql = "DELETE FROM Recipes WHERE recipe_id = ?"
-    db.pool.query(sql, req.params.recipe_id, function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.affectedRows === 1) {
-            res.status(204).json(results);
-        } else {
-           res.status(404).json({ Error: 'Resource not found' });
-        };
-    });
-    
+    delete_id('Recipes', req, res)    
 });
 
 /**
@@ -112,98 +158,27 @@ app.delete('/recipes/:recipe_id', (req, res) => {
 
 // Create a new ingredient with the provided parameters
 app.post('/ingredients', (req, res) => {
-    const parameters = [
-        req.body.name,
-        req.body.serving_size,
-        req.body.calories,
-        req.body.cals_per_100g
-    ];
-    const sql = "INSERT INTO Ingredients (name, serving_size, calories, cals_per_100g) VALUES (?, ?, ?, ?)";
-    db.pool.getConnection(function(err, connection) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        }
-        connection.query(sql, parameters, function(err) {
-            if (err) {
-                console.error(err)
-                res.status(400).json({ Error: 'Request failed' });
-            } else {
-                connection.query("SELECT LAST_INSERT_ID() as ingredient_id", function(err, results) {
-                    if (err) {
-                        console.error(err)
-                        res.status(400).json({ Error: 'Request failed' });
-                    } else {
-                        res.status(201).json({ingredient_id: results[0].ingredient_id});
-                    }
-                })
-            };
-        });
-        connection.release();
-    });
+    insert('Ingredients', req, res)
 });
-
 
 // Retrieve all ingredients
 app.get('/ingredients', (req, res) => {
-    const sql = "SELECT * FROM Ingredients ORDER BY name ASC"
-    db.pool.query(sql, function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.length === 0){ 
-            res.status(404).json({ Error: 'Resource not found' })
-        } else {
-            res.status(200).json(results);
-        };
-    });
+    select_all("Ingredients", req, res)
 });
 
 // Retrieve ingredient with specified id
 app.get('/ingredients/:ingredient_id', (req, res) => {
-    const sql = "SELECT * FROM Ingredients WHERE ingredient_id = ?"
-    db.pool.query(sql, req.params.ingredient_id, function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.length === 0){ 
-            res.status(404).json({ Error: 'Resource not found' })
-        } else {
-            res.status(200).json(results);
-        };
-    });
+    select_id('Ingredients', req, res)
 });
 
 // Update an ingredient with the provided parameters
 app.put('/ingredients/:ingredient_id', (req, res) => {
-    const parameters = req.body;
-    const sql = "UPDATE Ingredients SET ? WHERE ingredient_id = ?";
-    db.pool.query(sql, [parameters, req.params.ingredient_id], function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.affectedRows === 1) {
-            res.status(200).json(results);
-        } else {
-        res.status(404).json({ Error: 'Resource not found' });
-        };
-    });
+    update_id('Ingredients', req, res)
 });
 
 // Delete the ingredient with specified id
 app.delete('/ingredients/:ingredient_id', (req, res) => {
-    const sql = "DELETE FROM Ingredients WHERE ingredient_id = ?"
-    db.pool.query(sql, req.params.ingredient_id, function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.affectedRows === 1) {
-            res.status(204).json(results);
-        } else {
-           res.status(404).json({ Error: 'Resource not found' });
-        };
-    });
-    
+    delete_id('Ingredients', req, res)
 });
 
 
@@ -213,20 +188,7 @@ app.delete('/ingredients/:ingredient_id', (req, res) => {
 
 // Add an ingredient to a recipe
 app.post('/recipes/:recipe_id/ingredients', (req, res) => {
-    const parameters = [
-        req.params.recipe_id, 
-        req.body.ingredient_id, 
-        req.body.quantity,
-        req.body.grams];
-    const sql = "INSERT INTO RecipeIngredients (recipe_id, ingredient_id, quantity, grams) VALUES (?, ?, ?, ?)";
-    db.pool.query(sql, parameters, function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else {
-            res.status(201).json(results);
-        };
-    });
+    insert('RecipeIngredients', req, res)
 });
 
 // Get all ingredients for a recipe. Includes join of all ingredient parameters for each ingredient
@@ -246,34 +208,12 @@ app.get('/recipes/:recipe_id/ingredients', (req, res) => {
 
 // Update an ingredient for a recipe
 app.put('/recipe_ingredients/:recipe_ingredient_id', (req, res) => {
-    const parameters = req.body;
-    const sql = "UPDATE RecipeIngredients SET ? WHERE recipe_ingredient_id = ?";
-    db.pool.query(sql, [parameters, req.params.recipe_ingredient_id], function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.affectedRows === 1) {
-            res.status(200).json(results);
-        } else {
-        res.status(404).json({ Error: 'Resource not found' });
-        };
-    });
+    update_id('RecipeIngredients', req, res)
 });
 
 // Remove an ingredient from a recipe
 app.delete('/recipe_ingredients/:recipe_ingredient_id', (req, res) => {
-    const sql = "DELETE FROM RecipeIngredients WHERE recipe_ingredient_id = ?"
-    db.pool.query(sql, req.params.recipe_ingredient_id, function(err, results) {
-        if (err) {
-            console.error(err)
-            res.status(400).json({ Error: 'Request failed' });
-        } else if (results.affectedRows === 1) {
-            res.status(204).json(results);
-        } else {
-           res.status(404).json({ Error: 'Resource not found' });
-        };
-    });
-    
+    delete_id('RecipeIngredients', req, res)
 });
 
 

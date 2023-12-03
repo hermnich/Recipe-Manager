@@ -5,73 +5,48 @@ body {
     flex-direction: column;
     text-align: center;
 }
-  
-
-
-.release-info {
-    padding-bottom: 10px;
-}
-
-table {
-    border: 2px solid;
-    border-collapse: collapse;
-}
-  
-tr th {
-    border: 2px solid;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-  
-tr td {
-    border: 2px solid;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
-
-.nav-bar {
+ 
+.nav {
     padding-bottom: 15px;
     display: flex;
     flex-direction: row;
 }
 
-.app-nav, .app-edit {
-    align-self: end;
+.nav-edit {
+    position: relative;
 }
 
-.nav-bar .title-text {
+#popup-add {
+    position: absolute;
+    top: 30px;
+    right: 0px;
+    z-index: 1;
+}
+
+.title {
+    height: 36px;
     flex-grow: 1;
+    padding-left: 20px;
+    padding-right: 20px;
     font-size: 30px;
     font-weight: bold;
-    padding-left: 20px;
-    padding-right: 20px;
+    & input {
+        font-weight: bold;
+        font-size: 25px;
+    }
 }
 
-.nav-bar .title-input {
-    flex-grow: 1;
-    padding-left: 20px;
-    padding-right: 20px;
+table, th, td {
+    border: 2px solid;
+    border-collapse: collapse;
+    padding-left: 10px;
+    padding-right: 10px;
+    & .table-add {
+        text-align: left;
+    }
 }
 
-.nav-bar .title-input input {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-
-.add-button, .home-button, .back-button, .save-button, .delete-button {
-    padding-left: 4px;
-    padding-right: 4px;
-}
-
-.table-add {
-    text-align: left;
-}
-
- 
-/* Tooltip text */
-.tooltiptext {
+.tooltip-text {
     visibility: hidden;
     font-size: small;
     background-color: grey;
@@ -79,33 +54,14 @@ tr td {
     text-align: center;
     padding: 2px 6px;
     border-radius: 3px;
-   
-/* Position the tooltip text - see examples below! */
     position: absolute;
     z-index: 1;
 }
   
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
+.tooltip:hover + .tooltip-text {
     visibility: visible;
+    transition-delay: 1s;
 }
-
-.popup-select{
-    visibility: hidden;
-    text-align: center;
-    position: absolute;
-    top: 50px;
-    z-index: 1;
-}
-
-.add-popup:hover .popup-select{
-    visibility: visible;
-}
-
-.home-page-button {
-    padding: 20px;
-}
-
 
 .data-input {
     padding: 10px;
@@ -121,10 +77,112 @@ tr td {
     text-align: left;
 }
 
-.release-info {
-    padding-top: 30vh;
+.btn {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.btn-browse {
+    width: 200px;
+    padding: 20px;
+    font-size: 16px;
+}
+.btn-nav {
+    color: black;
+    font-size: 30px;
+}
+.btn-nav:hover, .btn-table:hover{
+    color: grey;
+}
+.btn-popup {
+    width: 80px;
+}
+.btn-table {
+    font-size: 20px;
 }
 
-.release-text {
+.nutrition {
+    width: 290px;
+    text-align: left;
+    font-size: 14px;
+
+    & h2 {
+        font-size: 40px;
+        margin: 0px;
+    }
+
+    & .right {
+        float: right;
+    }
+
+    & input[type="number"] {
+        text-align: right;
+        width: 45px;
+    }
+
+    & .divider.thin {
+        border: 1px solid lightgrey;
+    }
+    & .divider.medium {
+        border: 4px solid black;
+    }
+    & .divider.thick {
+        border: 8px solid black;
+    }
+
+    & .main-category .label{
+        font-weight: bold
+        
+    }
+
+    & .sub-category {
+        padding-left: 30px;
+    }
+
+    & .value {
+        padding-left: 5px;
+    }
+
+    & .serving-size {
+        font-weight: bold;
+        font-size: 16px;
+
+        & input[type="number"] {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        & input[type="text"] {
+            font-weight: bold;
+            font-size: 15px;
+            width: 100px;
+        }
+    }
+
+    & .calories {
+        font-weight: bold;
+        font-size: 16px;
+
+        & .label {
+            font-size: 32px;
+        }
+
+        & .value {
+            font-size: 36px;
+        }
+
+        & input[type="number"] {
+            font-weight: bold;
+            font-size: 32px;
+            width: 80px;
+        }
+    }
+
+    & .added-sugars {
+        padding-left: 60px;
+    }
+}
+
+.release-info {
+    padding-top: 30vh;
     text-align: left;
 }
