@@ -1,3 +1,4 @@
+
 async function create(recipe, nav_function) {
     const response = await fetch(`/recipes`, {
         method: 'POST',

@@ -5,22 +5,19 @@ import RecipeIngredientTableView from '../components/RecipeIngredientTableView'
 import NutritionView from '../components/NutritionView';
 import * as Recipes from '../modules/Recipes'
 import * as RecipeIngredients from '../modules/RecipeIngredients'
-import * as Nutrition from '../modules/Nutrition'
 import {MdEdit, MdDelete} from 'react-icons/md';
 
 
-function RecipeView() {
+export default function RecipeView() {
     const navigate = useNavigate();
-
     const {recipe_id} = useParams();
-
     const [recipe, setRecipe] = useState({});
     const [recipeIngredients, setRecipeIngredients] = useState([]);
-    const [nutrition, setNutrition] = useState(Nutrition.emptyNutrition);
+    const [nutrition, setNutrition] = useState({});
 
     useEffect(() => {
-        Recipes.loadID(recipe_id, setRecipe);
-        RecipeIngredients.load(recipe_id, (ingredients) => {setRecipeIngredients(ingredients); Nutrition.calcNutrition(ingredients, setNutrition)})
+        Recipes.loadID(recipe_id, setRecipe)
+        RecipeIngredients.load(recipe_id, recipe.servings, setRecipeIngredients, setNutrition)
     }, []);
 
     return (
@@ -38,19 +35,17 @@ function RecipeView() {
                 </span>
             </div>
             <RecipeIngredientTableView recipeIngredients={recipeIngredients}/>
-            <p className='servings'>
+            <div className='data-view servings'>
                 <span className='label'>Servings: </span>
                 <span className='value'>{recipe.servings}</span>
-            </p>
-            <p className='instructions'>
+            </div>
+            <div className='data-view instructions'>
                 <div className='label'>Instructions: </div>
                 <fieldset className='value'>
                     <p>{recipe.instructions}</p>
                 </fieldset>
-            </p>
+            </div>
             <NutritionView nutrition={nutrition}/>
         </div>
     )
 }
-
-export default RecipeView;

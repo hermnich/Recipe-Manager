@@ -6,9 +6,8 @@ import * as Recipes from '../modules/Recipes'
 import {MdAdd} from 'react-icons/md';
 
 
-function BrowseRecipes(){
+export default function BrowseRecipes(){
     const navigate = useNavigate()
-
     const [recipes, setRecipes] = useState([]);
 
     useEffect(() => {
@@ -34,5 +33,3 @@ function BrowseRecipes(){
         </div>
     );
 }
-
-export default BrowseRecipes;

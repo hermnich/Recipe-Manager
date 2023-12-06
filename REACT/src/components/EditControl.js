@@ -1,4 +1,6 @@
+import React from 'react';
 import {MdSave, MdDelete, MdClose} from 'react-icons/md';
+
 
 export default function EditControl ({onSave, onDelete, onClose}) {
     return (

@@ -2,6 +2,7 @@ import React from 'react';
 import {useNavigate} from 'react-router-dom';
 import {MdHome, MdArrowBack} from 'react-icons/md';
 
+
 export default function Navigation() {
     const navigate = useNavigate()
 

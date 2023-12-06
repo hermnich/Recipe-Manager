@@ -1,7 +1,42 @@
-async function create(recipe_id, recipeIngredient, load_function) {
+
+async function calcNutrition(recipeIngredients, num_servings, set_function) {
+    let nutrition = {
+        "serving_size": 0,
+        "calories": 0,
+        "total_fat": 0,
+        "saturated_fat": 0,
+        "trans_fat": 0,
+        "cholesterol": 0,
+        "sodium": 0,
+        "total_carbohydrate": 0,
+        "dietary_fiber": 0,
+        "total_sugars": 0,
+        "added_sugars": 0,
+        "protein": 0,
+        "vitamin_d": 0,
+        "calcium": 0,
+        "iron": 0,
+        "potassium": 0,
+    }
+
+    for (const index in recipeIngredients) {
+        for (const key in nutrition) {
+            if (key === 'serving_size') {
+                nutrition.serving_size += recipeIngredients[index].quantity / num_servings
+            } else if (key in recipeIngredients[index]) {
+                nutrition[key] += recipeIngredients[index][key] * recipeIngredients[index].quantity / 100 / num_servings
+            }
+        }
+    }
+    set_function(nutrition)
+}
+
+async function create(recipe_id, ingredient_id, data, load_function) {
+    data.recipe_id = recipe_id;
+    data.ingredient_id = ingredient_id;
     const response = await fetch(`/recipes/${recipe_id}/ingredients`, {
         method: 'POST',
-        body: JSON.stringify(recipeIngredient),
+        body: JSON.stringify(data),
         headers: {
             'Content-Type': 'application/json',
         },
@@ -14,30 +49,29 @@ async function create(recipe_id, recipeIngredient, load_function) {
     }        
 }
 
-async function load(recipe_id, set_function) {
+async function load(recipe_id, num_servings, set_ingredients_function, set_nutrition_function) {
     const response = await fetch(`/recipes/${recipe_id}/ingredients`);
     if (response.status === 200) {
         const recipeIngredients = await response.json();
-        set_function(recipeIngredients);
+        set_ingredients_function(recipeIngredients);
+        calcNutrition(recipeIngredients, num_servings, set_nutrition_function);
     } else {
-        set_function([])
+        set_ingredients_function([])
+        set_nutrition_function({})
     }
 };
 
-async function updateID(recipeIngredient) {
-    const data = {
-        ingredient_id: recipeIngredient.ingredient_id,
-        quantity_text: recipeIngredient.quantity_text,
-        quantity: recipeIngredient.quantity
-    }
-    const response = await fetch(`/recipe_ingredients/${recipeIngredient.recipe_ingredient_id}`, {
+async function updateID(recipe_ingredient_id, data, load_function) {
+    const response = await fetch(`/recipe_ingredients/${recipe_ingredient_id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
         headers: {
             'Content-Type': 'application/json',
         },
     });
-    if (response.status !== 200) {
+    if (response.status === 200) {
+        load_function()
+    } else {
         console.error(`Failed to edit ingredient, status code = ${response.status}`);
     }
 };

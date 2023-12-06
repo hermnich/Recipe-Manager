@@ -5,6 +5,7 @@ import * as Ingredients from '../modules/Ingredients'
 import * as Recipes from '../modules/Recipes'
 import {MdAdd, MdEdit, MdDelete} from 'react-icons/md';
 
+
 export default function HomePage(){
     const navigate = useNavigate()
 

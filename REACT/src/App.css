@@ -63,18 +63,19 @@ table, th, td {
     transition-delay: 1s;
 }
 
-.data-input {
+.data-input, .data-view {
     padding: 10px;
     text-align: left;
 }
 
 .data-input input[type="number"] {
+    text-align: right;
     width: 50px;
 }
 
-.instruction-label, .instruction-input {
-    padding-left: 10px;
-    text-align: left;
+.data-input.table {
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .btn {
@@ -110,13 +111,13 @@ table, th, td {
         margin: 0px;
     }
 
-    & .right {
-        float: right;
-    }
-
     & input[type="number"] {
         text-align: right;
         width: 45px;
+    }
+
+    & .right {
+        float: right;
     }
 
     & .divider.thin {
