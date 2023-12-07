@@ -46,7 +46,7 @@ export default function RecipeEdit() {
             </div>
             <div className='data-input instructions'>
                 <div className='label'>Instructions: </div>
-                <textarea id='instructions' cols='70' rows='10' value={recipe.instructions} onChange={e => setRecipe({...recipe, instructions: e.target.value})}/>
+                <textarea rows='10' value={recipe.instructions} onChange={e => setRecipe({...recipe, instructions: e.target.value})}/>
             </div>
             <NutritionView nutrition={nutrition}/>
         </div>

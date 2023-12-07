@@ -1,15 +1,26 @@
 body {
     margin: 20px;
-    align-items: center;
+    justify-content: space-around;
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+}
+
+#root {
+    flex: 0 1 650px;
+}
+
+.page {
     display: flex;
     flex-direction: column;
-    text-align: center;
+    height: 100vh;
 }
  
 .nav {
     padding-bottom: 15px;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
 }
 
 .nav-edit {
@@ -24,13 +35,12 @@ body {
 }
 
 .title {
-    height: 36px;
-    flex-grow: 1;
     padding-left: 20px;
     padding-right: 20px;
     font-size: 30px;
     font-weight: bold;
     & input {
+        text-align: center;
         font-weight: bold;
         font-size: 25px;
     }
@@ -73,6 +83,15 @@ table, th, td {
     width: 50px;
 }
 
+.instructions {
+    padding-bottom: 40px;
+    white-space: pre-line;
+    & textarea {
+        width: 100%;
+        resize: vertical;
+    }
+}
+
 .data-input.table {
     padding-top: 0;
     padding-bottom: 0;
@@ -102,6 +121,7 @@ table, th, td {
 }
 
 .nutrition {
+    align-self: center;
     width: 290px;
     text-align: left;
     font-size: 14px;
@@ -184,6 +204,6 @@ table, th, td {
 }
 
 .release-info {
-    padding-top: 30vh;
+    margin-top: auto;
     text-align: left;
 }
