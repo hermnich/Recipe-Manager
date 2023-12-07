@@ -17,16 +17,16 @@ export default function RecipeView() {
 
     useEffect(() => {
         Recipes.loadID(recipe_id, setRecipe)
-        RecipeIngredients.load(recipe_id, recipe.servings, setRecipeIngredients, setNutrition)
     }, []);
+    useEffect(() => {
+        RecipeIngredients.load(recipe_id, recipe.servings, setRecipeIngredients, setNutrition)
+    }, [recipe])
 
     return (
         <div className='page page-recipe-view'>
             <div className='nav'>
                 <Navigation/>
-                <span className='title'>
-                    <input type="text" placeholder="Title" value={recipe.name} onChange={e => setRecipe({...recipe, name: e.target.value})}/>
-                </span >
+                <span className='title'>{recipe.name}</span >
                 <span className='nav-edit'>
                     <MdDelete className='btn btn-nav tooltip' onClick={() => Recipes.deleteID(recipe, () => navigate(`/recipes`))}/>
                     <span className='tooltip-text'>Delete Ingredient</span>

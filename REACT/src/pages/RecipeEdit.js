@@ -17,8 +17,10 @@ export default function RecipeEdit() {
 
     useEffect(() => {
         Recipes.loadID(recipe_id, setRecipe);
-        RecipeIngredients.load(recipe_id, recipe.servings, setRecipeIngredients, setNutrition)
     }, []);
+    useEffect(() => {
+        RecipeIngredients.load(recipe_id, recipe.servings, setRecipeIngredients, setNutrition)
+    }, [recipe])
 
     return (
         <div className='page page-recipe-edit'>
@@ -40,9 +42,7 @@ export default function RecipeEdit() {
             <div className='data-input servings'>
                 <label className='label'>Servings: </label>
                 <input className='value' id='servings' type='number' min='1' value={recipe.servings} 
-                onChange={e => {
-                    setRecipe({...recipe, servings: e.target.value})
-                    RecipeIngredients.load(recipe_id, e.target.value, setRecipeIngredients, setNutrition)}}/>
+                onChange={e => {setRecipe({...recipe, servings: e.target.value})}}/>
             </div>
             <div className='data-input instructions'>
                 <div className='label'>Instructions: </div>

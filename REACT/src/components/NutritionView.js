@@ -8,7 +8,7 @@ export default function NutritionView({nutrition}) {
             <hr className='divider thin'/>
             <div className='serving-size'>
                 <span className='label'>Serving Size</span>
-                <span className='right value'>{nutrition.serving_size_text} ({nutrition.serving_size})g</span>
+                <span className='right value'>{nutrition.serving_size_text} ({Math.round(nutrition.serving_size)})g</span>
             </div>
             <hr className='divider thick'/>
             <div className='calories'>

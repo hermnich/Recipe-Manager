@@ -10,7 +10,7 @@ export default function NutritionEdit({nutrition, set_function}) {
                 <span className='right value'>
                     <input type='text' value={nutrition.serving_size_text} placeholder="1 Cup" 
                         onChange={e => set_function({...nutrition, serving_size_text: e.target.value})}/> (
-                    <input type='number' value={nutrition.serving_size} 
+                    <input type='number' value={Math.round(nutrition.serving_size)} 
                         onChange={e => set_function({...nutrition, serving_size: e.target.value})}/>g)
                 </span>
             </div>
