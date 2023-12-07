@@ -13,7 +13,7 @@ export default function IngredientRow({row, onLoad, onEdit, onDelete}) {
                 <span className='tooltip-text'>View Ingredient</span>
             </td>
             <td>{row.serving_size}g</td>
-            <td>{row.calories}</td>
+            <td>{Math.round(row.calories * 10) / 10}</td>
             <td>
                 <MdEdit className='btn btn-table tooltip' onClick={() => onEdit(row.ingredient_id)}/>
                 <span className='tooltip-text'>Edit</span>
