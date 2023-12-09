@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {MdDelete, MdEdit} from 'react-icons/md';
 
 
-export default function RecipeRow({row, onEdit, onDelete}) {
+export default function RecipeRow({row, onEdit, onLoad, onDelete}) {
     const navigate = useNavigate();
 
     return (
@@ -19,7 +19,7 @@ export default function RecipeRow({row, onEdit, onDelete}) {
                 <span className='tooltip-text'>Edit</span>
             </td>
             <td>
-                <MdDelete className='btn btn-table tooltip' onClick={() => onDelete(row)}/>
+                <MdDelete className='btn btn-table tooltip' onClick={() => onDelete(row, onLoad)}/>
                 <span className='tooltip-text'>Delete</span>
             </td>
         </tr>
